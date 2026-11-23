@@ -1,5 +1,5 @@
 // Works under any sub-path (e.g. /tracker/) because everything is relative.
-const CACHE = "tracker-v6";
+const CACHE = "tracker-v8";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png"];
 const CDN = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
 
@@ -19,7 +19,8 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const u = new URL(req.url);
-  if (u.origin !== self.location.origin && req.url !== CDN) return;   // other sites (e.g. the optional breach check) go straight to the network
+  if (u.origin !== self.location.origin && req.url !== CDN) return;
+  if (u.searchParams.has("nocache")) { e.respondWith(fetch(req, {cache:"no-store"})); return; }   // update check: always ask the server   // other sites (e.g. the optional breach check) go straight to the network
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(req, { ignoreSearch: true });
     const net = fetch(req).then(r => { if (r && (r.ok || r.type === "opaque")) c.put(req, r.clone()); return r; }).catch(() => null);
