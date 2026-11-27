@@ -33,8 +33,8 @@ test.describe("online analyst", () => {
     const all = JSON.stringify(reqs); for (const secret of ["demo.user@example.com", "Netflix", "4111", "HomeNet", "Locker combination"]) expect(all.includes(secret)).toBe(false); await ctx.close();
   });
   test("model text can't inject HTML", async ({ browser }) => {
-    const { ctx, page } = await withKey(browser, (route) => ok(route, msg([{ type: "text", text: "<img src=x onerror=\"window.__pwn=1\"> <script>window.__pwn=1</script> hi" }])));
-    await openChat(page); await ask(page, "hello there"); await expect(page.locator(".cm.a", { hasText: "hi" })).toBeVisible(); expect(await page.evaluate(() => (window as any).__pwn)).toBeUndefined(); expect(await page.locator(".cm.a img").count()).toBe(0); await ctx.close();
+    const { ctx, page } = await withKey(browser, (route) => ok(route, msg([{ type: "text", text: "<img src=x onerror=\"window.__pwn=1\"> <script>window.__pwn=1</script> injection-check-ok" }])));
+    await openChat(page); await ask(page, "hello there"); await expect(page.locator(".cm.a", { hasText: "injection-check-ok" })).toBeVisible(); await page.waitForTimeout(200); expect(await page.evaluate(() => (window as any).__pwn)).toBeUndefined(); expect(await page.locator(".cm.a img").count()).toBe(0); await ctx.close();
   });
   test("a rejected key falls back to the offline assistant and says why", async ({ browser }) => {
     const { ctx, page } = await withKey(browser, (route) => route.fulfill({ status: 401, headers: { ...CORS, "content-type": "application/json" }, body: JSON.stringify({ error: { message: "invalid x-api-key" } }) }));
@@ -56,7 +56,7 @@ test.describe("online analyst", () => {
     const { ctx, page, reqs } = await withKey(browser, (route) => ok(route, msg([{ type: "text", text: "OK" }])));
     await openChat(page); await page.click("button[aria-label='Assistant settings']"); await expect(page.locator("#ai_set")).toContainText("Never sent"); expect(await page.locator("#ai_key").getAttribute("type")).toBe("password");
     await page.click("#ai_set button:text-is('Test')"); await expect(page.locator("#ai_set")).toContainText("Works"); expect(reqs.length).toBe(1);
-    await page.click("#ai_set button:has-text('Remove key')"); expect(await page.evaluate(() => localStorage.getItem("tracker.ai.v1"))).not.toContain("sk-ant"); await expect(page.locator("#ch_mode")).toContainText("Offline"); await ctx.close();
+    await page.click("#ai_set button:has-text('Remove key')"); expect(await page.evaluate(() => localStorage.getItem("tracker.ai.v1") ?? "")).not.toContain("sk-ant"); await expect(page.locator("#ch_mode")).toContainText("Offline"); await ctx.close();
   });
   test("the key is not in the backup data", async ({ browser }) => {
     const { ctx, page } = await withKey(browser, (route) => ok(route, msg([{ type: "text", text: "x" }]))); expect(await page.evaluate(() => localStorage.getItem("goal-tracker.v1")!.includes("sk-ant"))).toBe(false); await ctx.close();

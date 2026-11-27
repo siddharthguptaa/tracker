@@ -22,7 +22,7 @@ test.describe("to-do", () => {
     await page.fill("#tn_text", "Pay electricity bill tomorrow 6pm every month 30m"); await expect(page.locator("#tn_preview")).toContainText("Understood");
     await page.click(".sheet button:has-text('Add & add another')"); await expect(page.locator("#tn_text")).toHaveValue("");
     await page.fill("#tn_text", "Second one"); await page.click(".sheet .btns button:text-is('Add')"); await expect(page.locator(".sheet")).toHaveCount(0);
-    await page.click("button:has-text('All open')"); await expect(page.locator(".trw .ttx", { hasText: "Pay electricity bill" })).toBeVisible(); await expect(page.locator(".trw .ttx", { hasText: "Second one" })).toBeVisible(); await ctx.close();
+    await page.click("button:has-text('All open')"); await expect(page.getByRole("button", { name: "Pay electricity bill Tomorrow" })).toBeVisible(); await expect(page.locator(".trw .ttx", { hasText: "Second one" })).toBeVisible(); await ctx.close();
   });
   test("custom repeat, reminder, subtasks and notes are saved", async ({ browser }) => {
     const { ctx, page } = await seeded(browser); await openTab(page, "To-do"); await page.click("#fab");
@@ -103,14 +103,14 @@ test.describe("quick add and CSV", () => {
   });
   test("CSV: export downloads a file; importing a file previews then applies", async ({ browser }) => {
     const { ctx, page } = await seeded(browser); await openTab(page, "To-do"); await page.click("button[aria-label='To-do settings']");
-    const [dl] = await Promise.all([page.waitForEvent("download"), page.click(".sheet button:has-text('Export to-dos')")]); expect(dl.suggestedFilename()).toContain("todos-"); expect(dl.suggestedFilename().endsWith(".csv")).toBe(true);
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click(".sheet button:has-text('Export to-dos (.csv)')")]); expect(dl.suggestedFilename()).toContain("todos-"); expect(dl.suggestedFilename().endsWith(".csv")).toBe(true);
     await page.setInputFiles("input[aria-label='Import to-dos file']", { name: "in.csv", mimeType: "text/csv", buffer: Buffer.from("To-do,Due date\nCsv imported thing,2031-01-02\n") });
     await expect(page.locator(".sheet h1")).toHaveText("Import to-dos"); await expect(page.locator(".sheet")).toContainText("Csv imported thing"); await page.click(".sheet button:has-text('Apply 1 change')");
     await expect(page.locator("#toast")).toContainText("1 added"); await page.click(".sheet button:has-text('Close')"); await page.click("button:has-text('Upcoming')"); await expect(page.locator(".trw", { hasText: "Csv imported thing" })).toHaveCount(1); await ctx.close();
   });
   test("importing an .xlsx offline explains the reader needs internet", async ({ browser }) => {
     const { ctx, page } = await seeded(browser); await openTab(page, "To-do"); await page.click("button[aria-label='To-do settings']");
-    await page.setInputFiles("input[aria-label='Import to-dos file']", { name: "a.xlsx", mimeType: "application/octet-stream", buffer: Buffer.from("x") }); await expect(page.locator("#toast")).toContainText("Excel"); await ctx.close();
+    await ctx.setOffline(true); await page.setInputFiles("input[aria-label='Import to-dos file']", { name: "a.xlsx", mimeType: "application/octet-stream", buffer: Buffer.from("x") }); await expect(page.locator("#toast")).toContainText("Excel"); await ctx.close();
   });
 });
 
