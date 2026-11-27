@@ -1,0 +1,7 @@
+/* Responsive fixes specific to the React port. legacy.css stays a copy of the classic app's styles; this file loads after it. */
+
+/* Narrow phones (about 320–380px): segment labels wrap onto two lines instead of being cut off,
+   e.g. "Night comfort" in Settings › Theme and the To-do view switch. */
+@media (max-width:380px){
+  .seg button{white-space:normal;line-height:1.2;padding-left:4px;padding-right:4px}
+}

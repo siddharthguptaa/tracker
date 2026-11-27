@@ -1,0 +1,59 @@
+name: CI & Deploy (React Tracker)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tracker-next
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Type-check
+        run: npm run typecheck
+      - name: Unit tests (Vitest)
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end, responsive & offline tests
+        run: npm run test:e2e
+      - name: Parity report
+        run: npm run parity
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reports, path: "test-results\nplaywright-report\nPARITY.md", if-no-files-found: ignore }
+      - uses: actions/upload-artifact@v4
+        with: { name: dist, path: dist }
+
+  deploy:
+    # Runs ONLY when every check above passed, and only on main.
+    # Publishes dist/ into the /next/ folder of the branch GitHub Pages serves, keeping the classic app's files untouched.
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist }
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: ${{ vars.PAGES_BRANCH || 'gh-pages' }}   # set repo variable PAGES_BRANCH if Pages serves another branch
+          publish_dir: dist
+          destination_dir: next
+          keep_files: true
