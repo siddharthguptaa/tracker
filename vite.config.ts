@@ -13,6 +13,6 @@ export default defineConfig({
     globals: false,
     include: ["tests/unit/**/*.test.{ts,tsx}"],
     setupFiles: ["tests/unit/setup.ts"],
-    coverage: { reporter: ["text", "lcov"], include: ["src/domain/**", "src/assistant/**"] },
+    coverage: { provider: "v8", reporter: ["text", "lcov"], include: ["src/domain/**", "src/assistant/**"] },
   },
 });

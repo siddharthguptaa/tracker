@@ -37,7 +37,7 @@ export function TodoForm({ v, set, id }: { v: TodoFormValues; set: (p: Partial<T
         <select id={id + "_rep"} value={sel} onChange={(e) => setRep(e.target.value)}>{T_REPS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
         {sel === "custom" ? <div className="g2" style={{ marginTop: 6 }}>
           <input id={id + "_repn"} type="number" min={1} max={365} value={cn} aria-label="Every how many" onChange={(e) => { setCn(e.target.value); setRep("custom", e.target.value); }} />
-          <select id={id + "_repu"} aria-label="Unit" value={cu} onChange={(e) => { setCu(e.target.value as any); setRep("custom", cn, e.target.value); }}>{UNITS.map((u) => <option key={u} value={u}>{u}s</option>)}</select></div> : null}
+          <select id={id + "_repu"} aria-label="Unit" value={cu} onChange={(e) => { const u = e.target.value as typeof cu; setCu(u); setRep("custom", cn, u); }}>{UNITS.map((u) => <option key={u} value={u}>{u}s</option>)}</select></div> : null}
         {sel ? <label className="chkrow"><input type="checkbox" checked={fromDone} onChange={(e) => { setFromDone(e.target.checked); setRep(sel, cn, cu, e.target.checked); }} /> Count from the day I finish it</label> : null}
         <label htmlFor={id + "_rem"}>Reminder</label>
         <select id={id + "_rem"} value={v.rem == null ? "" : String(v.rem)} onChange={(e) => set({ rem: e.target.value === "" ? null : Number(e.target.value) })}>{[["", "No reminder"], ["0", "At the due time"], ["10", "10 minutes before"], ["60", "1 hour before"], ["1440", "1 day before"]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>

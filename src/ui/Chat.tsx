@@ -41,7 +41,7 @@ export function ChatSheet() {
     const snap = cSnap(); let msg: string | null; try { msg = a.run(); } catch { msg = null; }
     if (msg == null) { toast("Couldn't do that — nothing changed"); return; }
     play("ok");
-    setLog((l) => [...l.map((x) => (x.id === m.id ? { ...x, done: String(msg).replace(/<[^>]+>/g, ""), acts: [] } : x)), { id: uid(), r: "a", html: msg!, acts: [], snap }].slice(-60));
+    setLog((l) => [...l.map((x) => (x.id === m.id ? { ...x, done: String(msg).replace(/<[^>]+>/g, ""), acts: [] } : x)), { id: uid(), r: "a" as const, html: msg!, acts: [], snap }].slice(-60));
   };
   const undo = (m: Msg) => { if (!m.snap) return; try { cRestore(m.snap); setLog((l) => [...l.map((x) => (x.id === m.id ? { ...x, snap: null } : x)), { id: uid(), r: "a", html: "Undone — everything is back as it was.", acts: [] } as Msg]); play("warn"); } catch { toast("Couldn't undo"); } };
   return (
