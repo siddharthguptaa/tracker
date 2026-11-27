@@ -6,10 +6,12 @@ import type { Page, BrowserContext } from "@playwright/test";
 export const SEED = readFileSync(join(process.cwd(), "tests/fixtures/sample-seed.js"), "utf8");
 export const WIDTHS = [320, 360, 390, 412, 768, 1024, 1280, 1920];
 export const TABS = ["Home", "Goals", "To-do", "Money", "Vault"] as const;
+// The runner's baseURL applies to its own fixtures only, not to browser.newContext() calls, so pass it explicitly.
+export const BASE = process.env.BASE || "http://localhost:4173/";
 
 /** Fresh context with sample data pre-loaded (the seed only fills an empty browser, like the original). */
 export async function seeded(browser: any, w = 390, h = 844, opts: any = {}) {
-  const ctx: BrowserContext = await browser.newContext({ viewport: { width: w, height: h }, acceptDownloads: true, ...opts });
+  const ctx: BrowserContext = await browser.newContext({ baseURL: BASE, viewport: { width: w, height: h }, acceptDownloads: true, ...opts });
   await ctx.addInitScript(SEED);
   const page: Page = await ctx.newPage();
   const errors: string[] = [];

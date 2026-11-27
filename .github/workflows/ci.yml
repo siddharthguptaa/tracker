@@ -19,8 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
+        with: { node-version: 22 }
+      # npm ci needs a committed package-lock.json. cache: npm is left out on purpose:
+      # setup-node fails the job when it finds no lock file to key the cache on.
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "::warning::package-lock.json is not committed, so npm install resolves the newest matching versions. Run npm install once locally and commit package-lock.json."
+            npm install
+          fi
       - name: Type-check
         run: npm run typecheck
       - name: Unit tests (Vitest)

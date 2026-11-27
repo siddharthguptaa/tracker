@@ -10,7 +10,8 @@ Both use the same browser storage (`goal-tracker.v1`, `tally:*`), so your data i
 
 | Command | What it does |
 |---|---|
-| `npm ci` | install (needs internet once) |
+| `npm install` | install and write `package-lock.json`. Run once, then commit that file |
+| `npm ci` | install exactly what `package-lock.json` pins (CI uses this; needs internet once) |
 | `npm run dev` | local dev server |
 | `npm run build` | type-check + production build into `dist/` |
 | `npm run preview` | serve `dist/` on :4173 — **works with no internet** |

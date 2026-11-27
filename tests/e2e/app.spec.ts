@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seeded, openTab, overlaps, TABS, WIDTHS } from "./helpers";
+import { seeded, openTab, overlaps, TABS, WIDTHS, BASE } from "./helpers";
 
 test.describe("boots cleanly", () => {
   for (const w of [320, 390, 1280]) test(`every tab loads without errors at ${w}px`, async ({ browser }) => {
@@ -117,7 +117,7 @@ test.describe("compatibility with the classic app's data", () => {
     const s = await page.evaluate(() => JSON.parse(localStorage.getItem("goal-tracker.v1")!)); expect(s.futureThing).toEqual({ a: 1 }); expect(s.goals[0].futureField).toBe("keep"); await ctx.close();
   });
   test("corrupt storage does not crash the app", async ({ browser }) => {
-    const ctx = await browser.newContext(); await ctx.addInitScript(() => { localStorage.setItem("goal-tracker.v1", "{not json"); localStorage.setItem("tally:app:v1", "][" ); });
+    const ctx = await browser.newContext({ baseURL: BASE }); await ctx.addInitScript(() => { localStorage.setItem("goal-tracker.v1", "{not json"); localStorage.setItem("tally:app:v1", "][" ); });
     const page = await ctx.newPage(); const errs: string[] = []; page.on("pageerror", (e) => errs.push(e.message)); await page.goto("/"); await page.waitForSelector("#app h1");
     for (const t of TABS) await openTab(page, t); expect(errs).toEqual([]); await ctx.close();
   });
